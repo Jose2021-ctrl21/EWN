@@ -1,0 +1,117 @@
+<?php
+	include 'includes/session.php';
+	if(isset($_POST['compute'])){
+		$addEmployee = $_POST['add-employee'];
+        $dateFrom =  $_POST['date-from'];
+        $dateTo =  $_POST['date-to'];
+        $dateRange = $dateFrom.' - '.$dateTo;
+
+            // query for employee payroll
+            $sql2 = "SELECT *,
+            SUM(CAST(employee_financial_list.meal_allowance AS DECIMAL(10,2))) AS meal_allowance, 
+            SUM(CAST(employee_financial_list.adjustments AS DECIMAL(10,2))) AS adjustments,
+            SUM(CAST(employee_financial_list.transportation AS DECIMAL(10,2))) AS transportation,
+            SUM(CAST(employee_financial_list.incentives_value AS DECIMAL(10,2))) AS incentives_value
+            FROM employee_financial_list
+            WHERE date BETWEEN '$dateFrom' AND '$dateTo' AND location_id
+			GROUP BY location_id";
+                
+                $query2 = $conn->query($sql2);
+                if($query2->num_rows < 1){
+                    $_SESSION['error'] = 'No rows found';
+                }else{
+                    $row2 = $query2->fetch_assoc();
+                    $mealAllowance = (float)$row2["meal_allowance"];
+                    $adjustments = (float)$row2["adjustments"];
+                    $transportation = (float)$row2["transportation"];
+                    $salary = $row2["salary"];
+                    $incentivesValue = (float)$row2["incentives_value"];
+
+                    // $_SESSION['success'] = "mealAllowance:  $mealAllowance\n
+                    // adjustments:  $adjustments\n
+                    // transportation:  $transportation\n
+                    // Incentives value:  $incentivesValue\n";
+
+                    //EmployeeR contribution
+                    $sssEmployeer = !empty((float)$row2["sss_employeer"]) ? $row2["sss_employeer"] : 0;
+                    $tinEmployeer = !empty((float)$row2["tin_employeer"]) ? $row2["tin_employeer"] : 0;
+                    $philhealthEmployeer = !empty((float)$row2["philhealth_employeer"]) ? $row2["philhealth_employeer"] : 0;
+                    $pagibigEmployeer = !empty((float)$row2["pagibig_employeer"]) ? $row2["pagibig_employeer"] : 0;
+                    
+                     //TEST employeer contribution
+                    // $_SESSION['success'] = "sss_employeer:  $sssEmployeer\n
+                    // tin_employeer:  $tinEmployeer\n
+                    // philhealth_employeer:  $philhealthEmployeer\n
+                    // pagibig_employeer:  $pagibigEmployeer\n";
+
+                    //EmployeE contribution
+                    $sssEmp = !empty((float)$row2["sss_emp"]) ? $row2["sss_emp"] : 0;
+                    $tinEmp = !empty((float)$row2["tin_emp"]) ? $row2["tin_emp"] : 0;
+                    $philhealthEmp = !empty((float)$row2["philhealth_emp"]) ? $row2["philhealth_emp"] : 0;
+                    $pagibigEmp = !empty((float)$row2["pagibig_emp"]) ? $row2["pagibig_emp"] : 0;                    
+               
+                    // TEST emp contribution
+                //     $_SESSION['success'] = "
+                //     sss_employeer:  $sssEmployeer\n
+                //     tin_employeer:  $tinEmployeer\n
+                //     philhealth_employeer:  $philhealthEmployeer\n
+                //     pagibig_employeer:  $pagibigEmployeer\n
+                //     sss_emp:  $sssEmp\n
+                //     tin_emp:  $tinEmp\n
+                //     philhealth_emp:  $philhealthEmp\n
+                //     pagibig_emp:  $pagibigEmp\n
+                //    ";
+
+                    $grossEarnings = $mealAllowance + $adjustments + $transportation + $incentivesValue + $salary;
+
+                    //SSS Employeer contribution
+                    $sssEmployeerContribution = ($sssEmployeer * $grossEarnings);
+                    $sssEmpContribution = ($sssEmp * $grossEarnings);
+                    $sssContribution = $sssEmployeerContribution + $sssEmpContribution;
+                    //TIN Employeer contribution
+                    $tinEmployeerContribution = ($tinEmployeer * $grossEarnings);
+                    $tinEmpContribution = ($tinEmp * $grossEarnings);
+                    $tinContribution = $tinEmployeerContribution + $tinEmpContribution;
+                    //philhealth Employeer contribution
+                    $philhealthEmployeerContribution = ($philhealthEmployeer * $grossEarnings);
+                    $philhealthEmpContribution = ($philhealthEmp * $grossEarnings);
+                    $philhealthContribution =  $philhealthEmployeerContribution + $philhealthEmpContribution;
+                    //pagibig Employeer contribution
+                    $pagibigEmployeerContribution = ($pagibigEmployeer * $grossEarnings);
+                    $pagibigEmpContribution = ($pagibigEmp * $grossEarnings);
+                    $pagibigContribution = $pagibigEmployeerContribution +  $pagibigEmpContribution;
+
+
+                    //total deductions
+                    $totalDeduction = $sssContribution +  $tinContribution +  $philhealthContribution + $pagibigContribution;
+
+                    $netSalary = $grossEarnings - $totalDeduction;
+                     //TEST CONTRIBUTIONS
+                    $_SESSION['success'] = "
+                    GROSS:  $grossEarnings\n
+                    sss_Contribution:  $sssContribution\n
+                    tin_Contribution:  $tinContribution\n
+                    philhealth_Contribution:  $philhealthContribution\n
+                    pagibig_Contribution:  $pagibigContribution\n
+                    Total Deduction:  $totalDeduction\n
+                    Net salary:  $netSalary\n";
+                   
+
+                    // $sql = "INSERT INTO salary_computed (employee_id, date_range, salary, meal_allowance, incentives, adjustments, transportation,sss,pagibig,tin,philhealth,total_deduction,gross,net_salary,created_on) VALUES ('$addEmployee', '$dateRange', '$salary','$mealAllowance','$incentivesValue','$adjustments','$transportation','$sssContribution','$pagibigContribution','$tinContribution','$philhealthContribution','$totalDeduction','$grossEarnings','$netSalary',CURDATE())";
+                    // if($conn->query($sql)){
+                    	$_SESSION['success'] = 'payroll added successfully. Go to <a href="salary_computed.php">Salary calculation</a>     '.$dateTo."__".$dateFrom;
+                    // }
+                    // else{
+                    // 	$_SESSION['error'] = $conn->error;
+                    // }
+                    // $_SESSION['success'] = 'Employee attendance date found its match on salary calculation';
+            }
+            //end sql2, query2
+		// $_SESSION['success'] = 'Employee found';
+
+	}
+	else{
+		$_SESSION['error'] = 'Fill up add form first';
+	}
+	header('location: salary_calculation.php');
+?>

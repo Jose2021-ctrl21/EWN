@@ -1,0 +1,54 @@
+#top-bar{
+    background: #86FD86 !important;
+}
+#top-bar .container{
+    /* background-color: #d2d6de !important; */
+    /* background-color: whitesmoke !important; */
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    padding:2rem;
+    
+}
+#top-bar .container a{
+    font-size: 5dvh;
+    color:#0D2600;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    min-width: 100%; /* Ensure table takes full width of container */
+  }
+  
+  .login-page{
+    background:#BDFFC0 !important;
+  }
+
+  .col-xs-4 button{
+    background:#1A5900 !important;
+  }
+
+  #attendance div select{
+    background:#BDFFC0 !important;
+    color: #0D2600;
+  }
+  /* LOGIN */
+
+  /* REQUIRED */
+  .asterisk-red{
+    color:red;
+  }
+
+  .system-lock-container{
+    width:100%;
+    height:100%;
+    background:green;
+    position:fixed;
+    left:0;
+    top:0;
+    z-index:100000;
+  }
+
+
+  /* SYSTEM */
+  
